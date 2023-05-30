@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path");
 const pulls = require("./db/db.json");
+const fs = require("fs");
+const uuid = require("./helpers/uuid");
 
 const app = express();
 
@@ -34,7 +36,47 @@ app.get("/*", (req, res) => {
 app.post("/api/notes", (req, res) => {
   res.json(`${req.method} request received`);
   console.info(`${req.method} request received`);
-  console.info(req.body);
+
+  const { title, text } = req.body;
+
+  if (title && text) {
+    const newNote = {
+      title,
+      text,
+      review_id: uuid(),
+    };
+
+    const noteString = JSON.stringify(newNote);
+
+    fs.readFile(`./db/db.json`, "utf8", (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const parsedData = JSON.parse(data);
+
+        parsedData.push(newNote);
+
+        fs.writeFile(
+          "./db/db.json",
+          JSON.stringify(parsedData, null, 4),
+          (writeErr) =>
+            writeErr
+              ? console.error(writeErr)
+              : console.info("Successfully updated notes")
+        );
+      }
+    });
+
+    const response = {
+      status: "success",
+      body: newNote,
+    };
+    console.log(response);
+
+    res.json(response);
+  } else {
+    res.json("Error");
+  }
 });
 
 // delete routes
