@@ -3,6 +3,7 @@ const path = require("path");
 const pulls = require("./db/db.json");
 const fs = require("fs");
 const uuid = require("./helpers/uuid");
+const { v4: uuidv4 } = require("uuid");
 
 const app = express();
 
@@ -21,33 +22,29 @@ app.get("/", (req, res) => {
 // sets route to note taker page
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/notes.html"));
-  console.info(`${req.method} request received`);
 });
 
 //
 app.get("/api/notes", (req, res) => {
-  res.json(pulls);
-  console.info(`${req.method} request received`);
+  fs.readFile("./db/db.json", "utf8", (_, data) => {
+    res.json(JSON.parse(data));
+  });
 });
 
 // route that sends user back to main page if incorrect URL is used
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/index.html"));
-  console.info(`${req.method} request failed, returning to main page`);
 });
 
 // post
 app.post("/api/notes", (req, res) => {
-  res.json(`${req.method} request received`);
-  console.info(`${req.method} request received`);
-
   const { title, text } = req.body;
 
   if (title && text) {
     const newNote = {
       title,
       text,
-      id: uuid(),
+      id: uuidv4(),
     };
 
     fs.readFile(`./db/db.json`, "utf8", (err, data) => {
@@ -73,7 +70,6 @@ app.post("/api/notes", (req, res) => {
       status: "success",
       body: newNote,
     };
-    console.log(response);
 
     res.json(response);
   } else {
@@ -82,8 +78,13 @@ app.post("/api/notes", (req, res) => {
 });
 
 // delete routes
-app.delete("/api/notes:id", (req, res) => {
-  console.info(`${req.method} request received`);
+app.delete("/api/notes/:id", (req, res) => {
+  fs.readFile("./db/db.json", "utf8", (_, data) => {
+    const notes = JSON.parse(data);
+    const filteredNotes = notes.filter((note) => note.id !== req.params.id);
+    fs.writeFileSync("./db/db.json", JSON.stringify(filteredNotes, null, 4));
+    res.json(filteredNotes);
+  });
 });
 
 app.listen(PORT, () => {
