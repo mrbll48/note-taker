@@ -8,31 +8,35 @@ const app = express();
 
 const PORT = 3001;
 
+// middleware used in application
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// get routes
+// sets route to main page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
+// sets route to note taker page
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/notes.html"));
   console.info(`${req.method} request received`);
 });
 
+//
 app.get("/api/notes", (req, res) => {
   res.json(pulls);
   console.info(`${req.method} request received`);
 });
 
+// route that sends user back to main page if incorrect URL is used
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "/public/index.html"));
   console.info(`${req.method} request failed, returning to main page`);
 });
 
-// post routes
+// post
 app.post("/api/notes", (req, res) => {
   res.json(`${req.method} request received`);
   console.info(`${req.method} request received`);
@@ -43,10 +47,8 @@ app.post("/api/notes", (req, res) => {
     const newNote = {
       title,
       text,
-      review_id: uuid(),
+      id: uuid(),
     };
-
-    const noteString = JSON.stringify(newNote);
 
     fs.readFile(`./db/db.json`, "utf8", (err, data) => {
       if (err) {
@@ -80,7 +82,7 @@ app.post("/api/notes", (req, res) => {
 });
 
 // delete routes
-app.delete("/api/notes", (req, res) => {
+app.delete("/api/notes:id", (req, res) => {
   console.info(`${req.method} request received`);
 });
 
