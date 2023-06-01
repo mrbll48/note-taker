@@ -22,9 +22,9 @@ This application is a note taking application. You can create a title for each n
 ## Installation
 
 1. In the terminal run npm i express.
-2. run npm i path.
-3. run npm i fs.
-4. run npm i uuid.
+2. In the terminal run npm i path.
+3. In the terminal run npm i fs.
+4. In the terminal run npm i uuid.
 
 ## Usage
 
